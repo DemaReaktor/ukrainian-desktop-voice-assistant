@@ -9,6 +9,10 @@ using System.Globalization;
 using System.Xml.Linq;
 using System.Linq;
 using AutoIt;
+using Vosk;
+using NAudio.Wave;
+using System.Threading;
+using System.Net.NetworkInformation;
 
 namespace Speech
 {
@@ -20,91 +24,124 @@ namespace Speech
         string voice;
         SpeechSynthesizer synthen;
         SpeechRecognitionEngine recognizer;
+        Model model;
+        VoskRecognizer voskRecognizer;
+        WaveFileWriter writer;
+        byte[] buffers=new byte[160000];
+
+        private void WaveInOnDataAvailable(object sender, WaveInEventArgs e)
+        {
+            buffers = e.Buffer;
+
+            //label1.Text = max.ToString();
+            try
+            {
+                writer.Write(e.Buffer, 0, e.BytesRecorded);
+
+                if (voskRecognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))  
+                    label2.Text = voskRecognizer.Result();
+                //Console.WriteLine(voskRecognizer.Result());
+                else 
+                    //Console.WriteLine(voskRecognizer.PartialResult());
+                label3.Text = voskRecognizer.PartialResult();
+            }
+            catch { }
+        }
 
         public Form1()
         {
             InitializeComponent();
-            synthen = new SpeechSynthesizer();
-            textBox1.Text = "привіт паляниця";
-            if (File.Exists("Settings.xml"))
-            {
-                var xElement = XElement.Load("Settings.xml");
-                rate = int.Parse(xElement.Element("rate").Value);
-                volume = int.Parse(xElement.Element("volume").Value);
-                voice = xElement.Element("voice").Value;
-            }
-            else
-            {
-                rate = 1;
-                volume = 50;
-                voice = "Anatol";
-                SaveSettings();
-            }
-            recognizer = new SpeechRecognitionEngine(new CultureInfo("en-US"));
+            model = new Model("E:\\Инет\\vosk-model-uk-v3\\vosk-model-uk-v3");
+            voskRecognizer = new VoskRecognizer(model,16000f);
 
-            Choices unsignedNumber = new Choices(WordsToNumbers.NumberTable.Keys.ToArray());
-            GrammarBuilder number = new GrammarBuilder(new Choices("minus", " "));
-            number.Append(unsignedNumber, 1, 5);
+            WaveInEvent waveIn = new WaveInEvent();
+            waveIn.WaveFormat = new WaveFormat(16000,1);
+            waveIn.DataAvailable += WaveInOnDataAvailable;
+            waveIn.StartRecording();
 
-            GrammarBuilder voiceBuild = new GrammarBuilder();
-            voiceBuild.Append("voice");
-            voiceBuild.Append(new Choices("rate", "volume"));
-            voiceBuild.Append(number);
-            voiceBuild.Culture = new CultureInfo("en-US");
+            writer = new WaveFileWriter(@"D:\test.wav", waveIn.WaveFormat);
 
-            Grammar voiceGrammar = new Grammar(voiceBuild);
-            voiceGrammar.Name = "voice";
+            //synthen = new SpeechSynthesizer();
+            //textBox1.Text = "привіт паляниця";
+            //if (File.Exists("Settings.xml"))
+            //{
+            //    var xElement = XElement.Load("Settings.xml");
+            //    rate = int.Parse(xElement.Element("rate").Value);
+            //    volume = int.Parse(xElement.Element("volume").Value);
+            //    voice = xElement.Element("voice").Value;
+            //}
+            //else
+            //{
+            //    rate = 1;
+            //    volume = 50;
+            //    voice = "Anatol";
+            //    SaveSettings();
+            //}
+            //recognizer = new SpeechRecognitionEngine(new CultureInfo("en-US"));
 
-            GrammarBuilder stopBuild = new GrammarBuilder(new Choices("sudo stop program", "sudo program exit", "sudo delete program"));
-            stopBuild.Culture = new CultureInfo("en-US");
-            Grammar generalGrammar = new Grammar(stopBuild);
-            generalGrammar.Name = "general";
+            //Choices unsignedNumber = new Choices(WordsToNumbers.NumberTable.Keys.ToArray());
+            //GrammarBuilder number = new GrammarBuilder(new Choices("minus", " "));
+            //number.Append(unsignedNumber, 1, 5);
 
-            GrammarBuilder writeBuild = new GrammarBuilder("write");
-            GrammarBuilder freeBuild = new GrammarBuilder();
-            freeBuild.AppendDictation();
-            writeBuild.Append(freeBuild,1,10);
-            writeBuild.Culture = new CultureInfo("en-US");
-            Grammar writeGrammar = new Grammar(writeBuild);
-            writeGrammar.Name = "write";
+            //GrammarBuilder voiceBuild = new GrammarBuilder();
+            //voiceBuild.Append("voice");
+            //voiceBuild.Append(new Choices("rate", "volume"));
+            //voiceBuild.Append(number);
+            //voiceBuild.Culture = new CultureInfo("en-US");
 
-            GrammarBuilder copyBuild = new GrammarBuilder("control c");
-            copyBuild.Culture = new CultureInfo("en-US");
-            Grammar copyGrammar = new Grammar(copyBuild);
-            copyGrammar.Name = "copy";
+            //Grammar voiceGrammar = new Grammar(voiceBuild);
+            //voiceGrammar.Name = "voice";
 
-            GrammarBuilder pasteBuild = new GrammarBuilder("control v");
-            pasteBuild.Culture = new CultureInfo("en-US");
-            Grammar pasteGrammar = new Grammar(pasteBuild);
-            pasteGrammar.Name = "paste";
+            //GrammarBuilder stopBuild = new GrammarBuilder(new Choices("sudo stop program", "sudo program exit", "sudo delete program"));
+            //stopBuild.Culture = new CultureInfo("en-US");
+            //Grammar generalGrammar = new Grammar(stopBuild);
+            //generalGrammar.Name = "general";
 
-            GrammarBuilder showVoicesBuild = new GrammarBuilder("show voices");
-            showVoicesBuild.Culture = new CultureInfo("en-US");
-            Grammar showVoicesGrammar = new Grammar(showVoicesBuild);
-            showVoicesGrammar.Name = "showVoices";
+            //GrammarBuilder writeBuild = new GrammarBuilder("write");
+            //GrammarBuilder freeBuild = new GrammarBuilder();
+            //freeBuild.AppendDictation();
+            //writeBuild.Append(freeBuild,1,10);
+            //writeBuild.Culture = new CultureInfo("en-US");
+            //Grammar writeGrammar = new Grammar(writeBuild);
+            //writeGrammar.Name = "write";
 
-            GrammarBuilder setVoiceBuild = new GrammarBuilder("set voice");
-            string[] names = new string[synthen.GetInstalledVoices().Count];
-            for (int i = 0; i < names.Length; i++)
-                names[i] = synthen.GetInstalledVoices().ElementAt(i).VoiceInfo.Name;
-            //setVoiceBuild.Append(new Choices(synthen.GetInstalledVoices().));
-            setVoiceBuild.Append(new Choices(names));
-            setVoiceBuild.Culture = new CultureInfo("en-US");
-            Grammar setVoiceGrammar = new Grammar(setVoiceBuild);
-            setVoiceGrammar.Name = "setVoice";
+            //GrammarBuilder copyBuild = new GrammarBuilder("control c");
+            //copyBuild.Culture = new CultureInfo("en-US");
+            //Grammar copyGrammar = new Grammar(copyBuild);
+            //copyGrammar.Name = "copy";
 
-            recognizer.LoadGrammar(voiceGrammar);
-            recognizer.LoadGrammar(generalGrammar);
-            recognizer.LoadGrammar(writeGrammar);
-            recognizer.LoadGrammar(copyGrammar);
-            recognizer.LoadGrammar(pasteGrammar);
-            recognizer.LoadGrammar(showVoicesGrammar);
-            recognizer.LoadGrammar(setVoiceGrammar);
-            recognizer.SpeechRecognized +=
-              new EventHandler<SpeechRecognizedEventArgs>(OnAudio);
+            //GrammarBuilder pasteBuild = new GrammarBuilder("control v");
+            //pasteBuild.Culture = new CultureInfo("en-US");
+            //Grammar pasteGrammar = new Grammar(pasteBuild);
+            //pasteGrammar.Name = "paste";
 
-            recognizer.SetInputToDefaultAudioDevice();
-            recognizer.RecognizeAsync(RecognizeMode.Multiple);
+            //GrammarBuilder showVoicesBuild = new GrammarBuilder("show voices");
+            //showVoicesBuild.Culture = new CultureInfo("en-US");
+            //Grammar showVoicesGrammar = new Grammar(showVoicesBuild);
+            //showVoicesGrammar.Name = "showVoices";
+
+            //GrammarBuilder setVoiceBuild = new GrammarBuilder("set voice");
+            //string[] names = new string[synthen.GetInstalledVoices().Count];
+            //for (int i = 0; i < names.Length; i++)
+            //    names[i] = synthen.GetInstalledVoices().ElementAt(i).VoiceInfo.Name;
+            ////setVoiceBuild.Append(new Choices(synthen.GetInstalledVoices().));
+            //setVoiceBuild.Append(new Choices(names));
+            //setVoiceBuild.Culture = new CultureInfo("en-US");
+            //Grammar setVoiceGrammar = new Grammar(setVoiceBuild);
+            //setVoiceGrammar.Name = "setVoice";
+
+            //recognizer.LoadGrammar(voiceGrammar);
+            //recognizer.LoadGrammar(generalGrammar);
+            //recognizer.LoadGrammar(writeGrammar);
+            //recognizer.LoadGrammar(copyGrammar);
+            //recognizer.LoadGrammar(pasteGrammar);
+            //recognizer.LoadGrammar(showVoicesGrammar);
+            //recognizer.LoadGrammar(setVoiceGrammar);
+            //recognizer.SpeechRecognized +=
+            //  new EventHandler<SpeechRecognizedEventArgs>(OnAudio);
+
+            //recognizer.SetInputToDefaultAudioDevice();
+            //recognizer.RecognizeAsync(RecognizeMode.Multiple);
         }
 
         void OnAudio(object sender, SpeechRecognizedEventArgs e)
@@ -227,6 +264,31 @@ namespace Speech
                 return result <= max && result >= min;
             }
             catch { return false; }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            int size = buffers.Length;
+            int max = buffers[0];
+            int avg = 0;
+            foreach (var element in buffers)
+            {
+                if (max < element)
+                    max = element;
+                avg += element;
+            }
+
+            label1.Text = (avg / size).ToString();
+            label4.Text = "";
+
+            size /= 16;
+            for (int i = 0; i < 16; i++)
+            {
+                avg = 0;
+                for (int x = 0; x < size; x++)
+                    avg += buffers[x + size * i];
+                label4.Text += new string('|', avg / size/5) + "\n";
+            }
         }
     }
     class WordsToNumbers
