@@ -1,9 +1,13 @@
-﻿namespace Speech2
+﻿using System.ComponentModel;
+
+namespace Speech2
 {
     class StopCommand : ICommand
     {
         bool isStop=false;
+        [Description("скажи зупинись або продовжити")]
         public bool Check(string text) => text.Equals("зупинись") || isStop;
+        [Description("перестає слухати поки не скажеш продовжити")]
         public void Execute(Assistant assistant, string text)
         {
             if(text == "зупинись")

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,9 @@ namespace Speech2
 {
     class TranslateCommand : ICommand
     {
+        [Description("скажи переклади і слово яке хоч перекласти")]
         public bool Check(string text) => text.Split(" ")[0].Equals("переклади");
+        [Description("каже перекладене слово")]
         public void Execute(Assistant assistant, string text)
         {
             if(assistant.Voices.Any(e => e.VoiceInfo.Culture.Name == "en-US"))

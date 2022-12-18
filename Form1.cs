@@ -1,21 +1,5 @@
 ﻿using System;
-using System.Data;
-using System.Linq;
 using System.Windows.Forms;
-using mphweb.Models;
-using mphdict;
-using mphdict.Models.morph;
-using System.IO;
-using Microsoft.EntityFrameworkCore;
-using uSofTrod.generalTypes.Models;
-using System.Xml.Linq;
-using System.Speech.Synthesis;
-using Vosk;
-using NAudio.Wave;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Diagnostics;
 using static Speech2.Assistant;
 using static Speech2.SearchWordCommand;
 
@@ -29,7 +13,7 @@ namespace Speech2
         {
             assistant = new Assistant("E:\\Инет\\vosk-model-uk-v3\\vosk-model-uk-v3");
             assistant.AddCommand(new StopCommand());
-            assistant.AddCommand(new SpeakControlCommand());
+            assistant.AddCommand(new CommentCommand());
             assistant.AddCommand(new SpeakCommand());
             assistant.AddCommand(new ExitCommand());
             assistant.AddCommand(new Volume());
@@ -40,7 +24,10 @@ namespace Speech2
             SearchWordCommand searchWord = new SearchWordCommand();
             searchWord.OnGetWord += new EventHandler((object o, EventArgs eventArgs)=>WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
             assistant.AddCommand(searchWord);
-            assistant.AddSpeakUpListener((object o, TextEventArgs speakEventArgs) => Debug.WriteLine(speakEventArgs.Text));
+            CommandsDescriptionCommand commandsDescriptionCommand = new CommandsDescriptionCommand();
+            assistant.AddSpeakUpListener((object o, TextEventArgs textEventArgs) => listBox1.Items.Add(textEventArgs.Text));
+            assistant.AddWriteListener((object o, TextEventArgs textEventArgs) => listBox1.Items.Add(textEventArgs.Text));
+            assistant.AddCommand(commandsDescriptionCommand);
 
             InitializeComponent();
             textBox1.Text = "привіт паляниця";

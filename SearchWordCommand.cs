@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using System.Windows.Forms;
 using mphweb.Models;
 using mphdict;
 using mphdict.Models.morph;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
 using uSofTrod.generalTypes.Models;
-using System.Xml.Linq;
-using System.Speech.Synthesis;
-using Vosk;
 using NAudio.Wave;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Diagnostics;
-using static Speech2.Assistant;
+using System.ComponentModel;
 
 namespace Speech2
 {
@@ -26,7 +18,9 @@ namespace Speech2
         DataB context = new DataB(new DbContextOptions<DataB>());
         public EventHandler OnGetWord;
 
+        [Description("скажи знайти і слово яке шукаєш")]
         public bool Check(string text) => text.Split(" ")[0].Equals("знайти");
+        [Description("виводить опис слова")]
         public void Execute(Assistant assistant, string text)
         {
             string word = text.Remove(0, 7);

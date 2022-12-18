@@ -23,7 +23,7 @@ namespace Speech2
     public class Assistant
     {
         public class TextEventArgs : EventArgs { public string Text; }
-        public delegate void SpeakMethod(object o, TextEventArgs speakEventArgs);
+        public delegate void TextMethod(object o, TextEventArgs speakEventArgs);
         private EventHandler<TextEventArgs> OnSpeakUp;
         private EventHandler<TextEventArgs> OnSpeakDown;
         private EventHandler<TextEventArgs> OnConsoleWrite;
@@ -130,12 +130,15 @@ namespace Speech2
             });
 
         public void Write(string text) => OnConsoleWrite?.Invoke(this, new TextEventArgs() { Text = text });
-        public void AddSpeakUpListener(SpeakMethod method) => OnSpeakUp += new EventHandler<TextEventArgs>(method);
-        public void RemoveSpeakUpListener(SpeakMethod method) => OnSpeakUp -= OnSpeakUp.GetInvocationList().First(e =>
-        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<TextEventArgs>;
-        public void AddSpeakDownListener(SpeakMethod method) => OnSpeakDown += new EventHandler<TextEventArgs>(method);
-        public void RemoveSpeakDownListener(SpeakMethod method) => OnSpeakDown -= OnSpeakUp.GetInvocationList().First(e =>
-        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<TextEventArgs>;
+        public void AddSpeakUpListener(TextMethod method) => OnSpeakUp += new EventHandler<TextEventArgs>(method);
+        public void RemoveSpeakUpListener(TextMethod method) => OnSpeakUp -= OnSpeakUp.GetInvocationList().First(e =>
+        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as TextMethod == method) as EventHandler<TextEventArgs>;
+        public void AddSpeakDownListener(TextMethod method) => OnSpeakDown += new EventHandler<TextEventArgs>(method);
+        public void RemoveSpeakDownListener(TextMethod method) => OnSpeakDown -= OnSpeakDown.GetInvocationList().First(e =>
+        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as TextMethod == method) as EventHandler<TextEventArgs>;
+        public void AddWriteListener(TextMethod method) => OnConsoleWrite += new EventHandler<TextEventArgs>(method);
+        public void RemoveWriteListener(TextMethod method) => OnConsoleWrite -= OnConsoleWrite.GetInvocationList().First(e =>
+        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as TextMethod == method) as EventHandler<TextEventArgs>;
 
         public Task Speak(string text) => Task.Run(() =>
         {
