@@ -25,14 +25,22 @@ namespace Speech2
             searchWord.OnGetWord += new EventHandler((object o, EventArgs eventArgs)=>WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
             assistant.AddCommand(searchWord);
             CommandsDescriptionCommand commandsDescriptionCommand = new CommandsDescriptionCommand();
-            assistant.AddSpeakUpListener((object o, TextEventArgs textEventArgs) => listBox1.Items.Add(textEventArgs.Text));
-            assistant.AddWriteListener((object o, TextEventArgs textEventArgs) => listBox1.Items.Add(textEventArgs.Text));
+            assistant.AddSpeakUpListener(AddListBoxText);
+            assistant.AddWriteListener(AddListBoxText);
             assistant.AddCommand(commandsDescriptionCommand);
 
             InitializeComponent();
             textBox1.Text = "привіт паляниця";
         }
-
+        public void AddListBoxText(object o, TextEventArgs textEventArgs)
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action<object,TextEventArgs>(AddListBoxText), new object[] { o,textEventArgs });
+                return;
+            }
+            listBox1.Items.Add(textEventArgs.Text);
+        }
         private void button1_Click(object sender, EventArgs e)
         {
             if (textBox1.Text != string.Empty)

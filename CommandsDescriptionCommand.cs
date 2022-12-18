@@ -12,12 +12,12 @@ namespace Speech2
         {
             foreach (var command in assistant.Commands)
             {
+                assistant.Write(new string('-', 5));
                 assistant.Write(command.GetType().Name);
                 assistant.Write("{");
                 try
                 {
-                    assistant.Write("Check: "+(command.GetType().FindMembers(System.Reflection.MemberTypes.Method, System.Reflection.BindingFlags.Public,
-                    null, null).First(e => e.Name == "Check").GetCustomAttributes(false).FirstOrDefault(e => e.GetType() ==
+                    assistant.Write("Check: "+ (command.GetType().GetMember("Check")[0].GetCustomAttributes(false).FirstOrDefault(e => e.GetType() ==
                     typeof(DescriptionAttribute)) as DescriptionAttribute).Description);
                 }
                 catch{
@@ -25,8 +25,7 @@ namespace Speech2
                 }
                 try
                 {
-                    assistant.Write("Execute: " + (command.GetType().FindMembers(System.Reflection.MemberTypes.Method, System.Reflection.BindingFlags.Public,
-                    null, null).First(e => e.Name == "Execute").GetCustomAttributes(false).FirstOrDefault(e => e.GetType() ==
+                    assistant.Write("Execute: " + (command.GetType().GetMember("Execute")[0].GetCustomAttributes(false).FirstOrDefault(e => e.GetType() ==
                     typeof(DescriptionAttribute)) as DescriptionAttribute).Description);
                 }
                 catch
@@ -34,6 +33,7 @@ namespace Speech2
                     assistant.Write("не відоме виконання");
                 }
                 assistant.Write("}");
+                assistant.Write(new string('-', 5));
             }
         }
     }

@@ -18,7 +18,7 @@ namespace Speech2
             {
                 string voice = assistant.Voice;
                 assistant.Voice = assistant.Voices.FirstOrDefault(e => e.VoiceInfo.Culture.Name == "en-US").VoiceInfo.Name;
-                assistant.Speak(Translator.Translate(text.Remove(0, 10)));
+                Task.WaitAll(assistant.Speak(Translator.Translate(text.Remove(0, 10))));
                 assistant.Voice = voice;
             }
         }

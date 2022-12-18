@@ -61,7 +61,7 @@ namespace Speech2
             {
                 if (synthen.GetInstalledVoices().Any(e => e.VoiceInfo.Name.ToLower() == value.ToLower()))
                 {
-                    voice = value;
+                    voice = value.ToLower();
                     SetData();
                 }
             }
@@ -108,25 +108,34 @@ namespace Speech2
 
         private Task GetData() => Task.Run(() =>
             {
-                if (File.Exists(settingsPath))
+                lock (settingsPath)
                 {
-                    var xElement = XElement.Load("Settings.xml");
-                    rate = int.Parse(xElement.Element("rate").Value);
-                    volume = int.Parse(xElement.Element("volume").Value);
-                    voice = xElement.Element("voice").Value.ToLower();
-                    return;
+                    if (File.Exists(settingsPath))
+                    {
+                        var xElement = XElement.Load("Settings.xml");
+                        rate = int.Parse(xElement.Element("rate").Value);
+                        volume = int.Parse(xElement.Element("volume").Value);
+                        voice = xElement.Element("voice").Value.ToLower();
+                        return;
+                    }
+                    rate = 0;
+                    volume = 50;
+                    voice = synthen.GetInstalledVoices().First().VoiceInfo.Name.ToLower();
                 }
-                rate = 0;
-                volume = 50;
-                Voice = synthen.GetInstalledVoices().First().VoiceInfo.Name.ToLower();
             });
         private Task SetData() => Task.Run(() =>
             {
-                XElement xElement = new XElement("settings");
-                xElement.Add(new XElement("rate", rate));
-                xElement.Add(new XElement("volume", volume));
-                xElement.Add(new XElement("voice", Voice));
-                xElement.Save(settingsPath);
+                lock (settingsPath)
+                    lock (voice)
+                        lock ((object)volume)
+                            lock ((object)rate)
+                            {
+                                XElement xElement = new XElement("settings");
+                                xElement.Add(new XElement("rate", rate));
+                                xElement.Add(new XElement("volume", volume));
+                                xElement.Add(new XElement("voice", voice));
+                                xElement.Save(settingsPath);
+                            }
             });
 
         public void Write(string text) => OnConsoleWrite?.Invoke(this, new TextEventArgs() { Text = text });
@@ -147,12 +156,13 @@ namespace Speech2
             if (!synthen.GetInstalledVoices().Any(e => e.VoiceInfo.Name.ToLower() == Voice.ToLower()))
                 return;
 
+            var builder = new PromptBuilder();
+            builder.StartStyle(new PromptStyle());
+
             synthen.Rate = rate;
             synthen.Volume = volume;
 
-            var builder = new PromptBuilder();
-            builder.StartStyle(new PromptStyle());
-            builder.StartVoice(synthen.GetInstalledVoices().First(e => e.VoiceInfo.Name.ToLower() == Voice.ToLower()).VoiceInfo);
+            builder.StartVoice(synthen.GetInstalledVoices().First(e => e.VoiceInfo.Name.ToLower() == voice).VoiceInfo);
             builder.AppendText(text);
             builder.EndVoice();
             builder.EndStyle();

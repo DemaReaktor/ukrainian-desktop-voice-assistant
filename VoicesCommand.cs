@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Speech.Synthesis;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,8 +19,10 @@ namespace Speech2
             foreach (var e in assistant.Voices)
             {
                 string voice = assistant.Voice;
-                assistant.Voice = e.VoiceInfo.Name;
-                assistant.Speak(e.VoiceInfo.Name);
+                VoiceInfo voiceInfo = e.VoiceInfo;
+                assistant.Voice = voiceInfo.Name;
+                string text1 = Translator.Translate(voiceInfo.Name, toLanguage: voiceInfo.Culture.Name);
+                Task.WaitAll(assistant.Speak(text1));
                 assistant.Voice = voice;
             }
         }
