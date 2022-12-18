@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Diagnostics;
 using static Speech2.Assistant;
-using static Speech2.SearchWord;
+using static Speech2.SearchWordCommand;
 
 namespace Speech2
 {
@@ -28,19 +28,19 @@ namespace Speech2
         public Form1()
         {
             assistant = new Assistant("E:\\Инет\\vosk-model-uk-v3\\vosk-model-uk-v3");
-            assistant.AddCommand(new Stop());
-            assistant.AddCommand(new SpeakControl());
-            assistant.AddCommand(new Speak());
-            assistant.AddCommand(new Exit());
+            assistant.AddCommand(new StopCommand());
+            assistant.AddCommand(new SpeakControlCommand());
+            assistant.AddCommand(new SpeakCommand());
+            assistant.AddCommand(new ExitCommand());
             assistant.AddCommand(new Volume());
-            assistant.AddCommand(new Voice());
+            assistant.AddCommand(new VoiceCommand());
             assistant.AddCommand(new Rate());
-            assistant.AddCommand(new Translate());
-            assistant.AddCommand(new Voices());
-            SearchWord searchWord = new SearchWord();
+            assistant.AddCommand(new TranslateCommand());
+            assistant.AddCommand(new VoicesCommand());
+            SearchWordCommand searchWord = new SearchWordCommand();
             searchWord.OnGetWord += new EventHandler((object o, EventArgs eventArgs)=>WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
             assistant.AddCommand(searchWord);
-            assistant.AddSpeakUpListener((object o, SpeakEventArgs speakEventArgs) => Debug.WriteLine(speakEventArgs.Text));
+            assistant.AddSpeakUpListener((object o, TextEventArgs speakEventArgs) => Debug.WriteLine(speakEventArgs.Text));
 
             InitializeComponent();
             textBox1.Text = "привіт паляниця";

@@ -22,10 +22,11 @@ namespace Speech2
 {
     public class Assistant
     {
-        public class SpeakEventArgs : EventArgs { public string Text; }
-        public delegate void SpeakMethod(object o, SpeakEventArgs speakEventArgs);
-        private EventHandler<SpeakEventArgs> OnSpeakUp;
-        private EventHandler<SpeakEventArgs> OnSpeakDown;
+        public class TextEventArgs : EventArgs { public string Text; }
+        public delegate void SpeakMethod(object o, TextEventArgs speakEventArgs);
+        private EventHandler<TextEventArgs> OnSpeakUp;
+        private EventHandler<TextEventArgs> OnSpeakDown;
+        private EventHandler<TextEventArgs> OnConsoleWrite;
         private readonly string settingsPath = "AssistantSettings.xml";
         /// <summary>
         /// -10 ... 10
@@ -67,13 +68,13 @@ namespace Speech2
         }
         private string voice;
         public bool IsWomen { get => synthen.GetInstalledVoices().Any(e => e.VoiceInfo.Name.ToLower() == Voice && e.VoiceInfo.Gender == VoiceGender.Female); }
-        public string[] Commands
+        public ICommand[] Commands
         {
             get
             {
-                string[] names = new string[commands.Count];
+                ICommand[] names = new ICommand[commands.Count];
                 for (int i = 0; i < commands.Count; i++)
-                    names[i] = commands.ElementAt(i).GetType().Name;
+                    names[i] = commands.ElementAt(i);
                 return names;
             }
         }
@@ -128,16 +129,17 @@ namespace Speech2
                 xElement.Save(settingsPath);
             });
 
-        public void AddSpeakUpListener(SpeakMethod method) => OnSpeakUp += new EventHandler<SpeakEventArgs>(method);
+        public void Write(string text) => OnConsoleWrite?.Invoke(this, new TextEventArgs() { Text = text });
+        public void AddSpeakUpListener(SpeakMethod method) => OnSpeakUp += new EventHandler<TextEventArgs>(method);
         public void RemoveSpeakUpListener(SpeakMethod method) => OnSpeakUp -= OnSpeakUp.GetInvocationList().First(e =>
-        (e as EventHandler<SpeakEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<SpeakEventArgs>;
-        public void AddSpeakDownListener(SpeakMethod method) => OnSpeakDown += new EventHandler<SpeakEventArgs>(method);
+        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<TextEventArgs>;
+        public void AddSpeakDownListener(SpeakMethod method) => OnSpeakDown += new EventHandler<TextEventArgs>(method);
         public void RemoveSpeakDownListener(SpeakMethod method) => OnSpeakDown -= OnSpeakUp.GetInvocationList().First(e =>
-        (e as EventHandler<SpeakEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<SpeakEventArgs>;
+        (e as EventHandler<TextEventArgs>).GetInvocationList().First() as SpeakMethod == method) as EventHandler<TextEventArgs>;
 
         public Task Speak(string text) => Task.Run(() =>
         {
-            OnSpeakUp?.Invoke(this, new SpeakEventArgs() { Text = text });
+            OnSpeakUp?.Invoke(this, new TextEventArgs() { Text = text });
 
             if (!synthen.GetInstalledVoices().Any(e => e.VoiceInfo.Name.ToLower() == Voice.ToLower()))
                 return;
@@ -152,7 +154,7 @@ namespace Speech2
             builder.EndVoice();
             builder.EndStyle();
             synthen.SpeakAsync(builder);
-            OnSpeakDown?.Invoke(this, new SpeakEventArgs() { Text = text });
+            OnSpeakDown?.Invoke(this, new TextEventArgs() { Text = text });
         });
 
         //записує голос
