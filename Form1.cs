@@ -46,36 +46,5 @@ namespace Speech2
             if (textBox1.Text != string.Empty)
                 assistant.Speak(textBox1.Text);
         }
-
-        //виконує команду
-        //void Command(string text)
-        //{
-        //    label1.Text = text;
-        //    if (synthen.State != SynthesizerState.Speaking)
-        //    {
-        //        switch (text)
-        //        {
-        //            case "команди":
-        //                if(!File.Exists("E:\\C#\\Speech2\\Speech2\\Speech2\\bin\\Debug\\net6.0-windows\\commands.html"))
-        //                    using (var stream = new StreamWriter("commands.html"))
-        //                {
-        //                    stream.WriteLine("<!DOCTYPE html>");
-        //                    stream.WriteLine("<html>");
-        //                    stream.WriteLine("<meta charset=\"UTF-8\">");
-        //                    stream.WriteLine("<body>");
-        //                    stream.WriteLine("<p>вийти | вихід | закрити | стоп - програма закривається</p>");
-        //                    stream.WriteLine("<p>команди - показується список команд</p>");
-        //                    stream.WriteLine("<p>скажи \"text\" - проговорюється text</p>");
-        //                    stream.WriteLine("<p>гучність \"value(0...10)\" - змінюється голос</p>");
-        //                    stream.WriteLine("<p>швидкість \"value(-10...10)\" - змінюється швидкість</p>");
-        //                    stream.WriteLine("<p>знайти \"word\" - знаходить дані про слово</p>");
-        //                    stream.WriteLine("</body>");
-        //                    stream.WriteLine("</html>");
-        //                }
-        //                WebBrowser.Url = new Uri("E:\\C#\\Speech2\\Speech2\\Speech2\\bin\\Debug\\net6.0-windows\\commands.html");
-        //                return;
-        //        }
-        //    }
-        //}
     }
 }

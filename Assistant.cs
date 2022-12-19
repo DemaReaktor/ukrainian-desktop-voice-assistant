@@ -1,22 +1,12 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
-using System.Windows.Forms;
-using mphweb.Models;
-using mphdict;
-using mphdict.Models.morph;
 using System.IO;
-using Microsoft.EntityFrameworkCore;
-using uSofTrod.generalTypes.Models;
 using System.Xml.Linq;
 using System.Speech.Synthesis;
 using Vosk;
 using NAudio.Wave;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Speech2.Properties;
-using SpeechLib;
-using System.Diagnostics.Tracing;
 
 namespace Speech2
 {
@@ -97,11 +87,17 @@ namespace Speech2
                 while (!isData.IsCompleted) { }
                 Speak("я готовий слухати");
             });
-
-            WaveInEvent waveIn = new WaveInEvent();
-            waveIn.WaveFormat = new WaveFormat(44100, 1);
-            waveIn.DataAvailable += WaveInOnDataAvailable;
-            waveIn?.StartRecording();
+            try
+            {
+                WaveInEvent waveIn = new WaveInEvent();
+                waveIn.WaveFormat = new WaveFormat(44100, 1);
+                waveIn.DataAvailable += WaveInOnDataAvailable;
+                waveIn?.StartRecording();
+            }
+            catch
+            {
+                Speak("твій мікрофон пішов за російським кораблем");
+            }
 
             commands = new LinkedList<ICommand>();
         }
