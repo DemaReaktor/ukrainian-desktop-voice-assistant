@@ -15,8 +15,13 @@ namespace Speech2
      class SearchWordCommand : ICommand
     {
         public class WordEventArgs : EventArgs { public Uri Uri; }
-        DataB context = new DataB(new DbContextOptions<DataB>());
+        DataB context;
         public EventHandler OnGetWord;
+
+        public SearchWordCommand()
+        {
+           context = MphDataBaseConstructor.DataBase;
+        }
 
         [Description("скажи знайти і слово яке шукаєш")]
         public bool Check(string text) => text.Split(" ")[0].Equals("знайти");
@@ -72,40 +77,7 @@ namespace Speech2
                 stream.WriteLine("</body>");
                 stream.WriteLine("</html>");
             }
-            //WebBrowser.Url =
-                return new Uri("E:\\C#\\Speech2\\Speech2\\Speech2\\bin\\Debug\\net6.0-windows\\word.html");
-        }
-    }
-    //база даних українського словника
-    class DataB : DbContext
-    {
-        public DbSet<word_param> words_list { get; set; }
-        public DbSet<indents> indents { get; set; }
-        public DbSet<flexes> flexes { get; set; }
-        public DbSet<alphadigit> alphadigits { get; set; }
-        public DbSet<parts> parts { get; set; }
-        public DbSet<accents_class> accents_class { get; set; }
-        public DbSet<accent> accent { get; set; }
-
-        public DataB(DbContextOptions<DataB> options) : base(options) { }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlite("datasource=E:\\C#\\Lemitologia\\mphdict\\src\\data/mph_ua.db");
-        }
-        protected override void OnModelCreating(ModelBuilder /*DbModelBuilder*/ modelBuilder)
-        {
-            modelBuilder.Entity<word_param>().ToTable("nom");
-
-            modelBuilder.Entity<alphadigit>().ToTable("alphadigit", "dbo");
-            modelBuilder.Entity<alphadigit>()
-           .HasKey(c => new { c.lang, c.alpha, c.ls });
-            modelBuilder.Entity<word_param>().HasIndex(b => b.accent);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.digit);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.reverse);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.isdel);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.part);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.reestr);
-            modelBuilder.Entity<word_param>().HasIndex(b => b.type);
+            return new Uri("E:\\C#\\Speech2\\Speech2\\Speech2\\bin\\Debug\\net6.0-windows\\word.html");
         }
     }
 }

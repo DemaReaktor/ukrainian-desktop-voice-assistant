@@ -18,6 +18,7 @@ namespace Speech2
         private EventHandler<TextEventArgs> OnSpeakDown;
         private EventHandler<TextEventArgs> OnConsoleWrite;
         private readonly string settingsPath = "AssistantSettings.xml";
+        private Task recognizer;
         /// <summary>
         /// -10 ... 10
         /// </summary>
@@ -81,11 +82,10 @@ namespace Speech2
 
             Task isData = GetData();
 
-            Task.Run(() =>
+            recognizer = Task.Run(() =>
             {
                 voskRecognizer = new VoskRecognizer(new Model(ModelPath), 44100f);
                 while (!isData.IsCompleted) { }
-                Speak("я готовий слухати");
             });
             try
             {
@@ -101,6 +101,7 @@ namespace Speech2
 
             commands = new LinkedList<ICommand>();
         }
+        public Task Recognizer => recognizer; 
 
         private Task GetData() => Task.Run(() =>
             {

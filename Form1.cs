@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Speech2.Assistant;
 using static Speech2.SearchWordCommand;
@@ -12,25 +13,38 @@ namespace Speech2
         public Form1()
         {
             assistant = new Assistant("E:\\Инет\\vosk-model-uk-v3\\vosk-model-uk-v3");
-            assistant.AddCommand(new StopCommand());
-            assistant.AddCommand(new CommentCommand());
-            assistant.AddCommand(new SpeakCommand());
-            assistant.AddCommand(new ExitCommand());
-            assistant.AddCommand(new Volume());
-            assistant.AddCommand(new VoiceCommand());
-            assistant.AddCommand(new Rate());
-            assistant.AddCommand(new TranslateCommand());
-            assistant.AddCommand(new VoicesCommand());
-            SearchWordCommand searchWord = new SearchWordCommand();
-            searchWord.OnGetWord += new EventHandler((object o, EventArgs eventArgs)=>WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
-            assistant.AddCommand(searchWord);
-            CommandsDescriptionCommand commandsDescriptionCommand = new CommandsDescriptionCommand();
-            assistant.AddSpeakUpListener(AddListBoxText);
-            assistant.AddWriteListener(AddListBoxText);
-            assistant.AddCommand(commandsDescriptionCommand);
+
+            Task commands = Task.Run(() =>
+            {
+                assistant.AddCommand(new StopCommand());
+                assistant.AddCommand(new CommentCommand());
+                assistant.AddCommand(new SpeakCommand());
+                assistant.AddCommand(new ExitCommand());
+                assistant.AddCommand(new Volume());
+                assistant.AddCommand(new VoiceCommand());
+                assistant.AddCommand(new Rate());
+                assistant.AddCommand(new TranslateCommand());
+                assistant.AddCommand(new VoicesCommand());
+                SearchWordCommand searchWord = new SearchWordCommand();
+                searchWord.OnGetWord += new EventHandler((object o, EventArgs eventArgs) => WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
+                assistant.AddCommand(searchWord);
+                WordVariantsCommand searchWords = new WordVariantsCommand();
+                searchWords.OnGetWords += new EventHandler((object o, EventArgs eventArgs) => WebBrowser.Url = (eventArgs as WordEventArgs).Uri);
+                assistant.AddCommand(searchWords);
+                CommandsDescriptionCommand commandsDescriptionCommand = new CommandsDescriptionCommand();
+                assistant.AddSpeakUpListener(AddListBoxText);
+                assistant.AddWriteListener(AddListBoxText);
+                assistant.AddCommand(commandsDescriptionCommand);
+
+            });
 
             InitializeComponent();
             textBox1.Text = "привіт паляниця";
+
+            Task.Run(() => {
+                while (!(assistant.Recognizer.IsCompleted && commands.IsCompleted)) { };
+                assistant.Speak("я готовий слухати");
+            });
         }
         public void AddListBoxText(object o, TextEventArgs textEventArgs)
         {
