@@ -40,6 +40,7 @@ namespace Speech2
 
             InitializeComponent();
             textBox1.Text = "привіт паляниця";
+            Form1_SizeChanged(this,null);
 
             Task.Run(() => {
                 while (!(assistant.Recognizer.IsCompleted && commands.IsCompleted)) { };
@@ -59,6 +60,12 @@ namespace Speech2
         {
             if (textBox1.Text != string.Empty)
                 assistant.Speak(textBox1.Text);
+        }
+
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            WebBrowser.Size = new System.Drawing.Size(WebBrowser.Width,Height-80);
+            listBox1.Size = new System.Drawing.Size(listBox1.Width,Height-80);
         }
     }
 }

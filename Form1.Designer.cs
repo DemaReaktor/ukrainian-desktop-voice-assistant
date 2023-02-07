@@ -41,7 +41,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(270, 42);
+            this.label1.Location = new System.Drawing.Point(270, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 15);
             this.label1.TabIndex = 0;
@@ -50,7 +50,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(790, 42);
+            this.label2.Location = new System.Drawing.Point(790, 9);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 15);
             this.label2.TabIndex = 1;
@@ -65,9 +65,9 @@
             // 
             // WebBrowser
             // 
-            this.WebBrowser.Location = new System.Drawing.Point(790, 60);
+            this.WebBrowser.Location = new System.Drawing.Point(790, 27);
             this.WebBrowser.Name = "WebBrowser";
-            this.WebBrowser.Size = new System.Drawing.Size(430, 484);
+            this.WebBrowser.Size = new System.Drawing.Size(430, 544);
             this.WebBrowser.TabIndex = 5;
             // 
             // button1
@@ -89,14 +89,14 @@
             // 
             this.listBox1.FormattingEnabled = true;
             this.listBox1.ItemHeight = 15;
-            this.listBox1.Location = new System.Drawing.Point(270, 60);
+            this.listBox1.Location = new System.Drawing.Point(270, 27);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(465, 484);
+            this.listBox1.Size = new System.Drawing.Size(465, 544);
             this.listBox1.TabIndex = 7;
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(1276, 583);
+            this.ClientSize = new System.Drawing.Size(1276, 585);
             this.Controls.Add(this.listBox1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBox1);
@@ -104,6 +104,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.WebBrowser);
             this.Name = "Form1";
+            this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();
 
